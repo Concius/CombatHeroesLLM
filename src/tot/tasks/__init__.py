@@ -8,5 +8,8 @@ def get_task(name):
     elif name == 'crosswords':
         from tot.tasks.crosswords import MiniCrosswordsTask
         return MiniCrosswordsTask()
+    elif name == 'fencing_game':
+        from tot.tasks.fencing_game import FencingTask
+        return FencingTask()
     else:
         raise NotImplementedError
