@@ -58,3 +58,7 @@ This leaderboard tracks model performance in a head-to-head tournament.
 
 - Joe Dever & Peter Parr for creating the Combat Heroes series, an incredible system for deterministic, adversarial gameplay.
 - Shunyu Yao, Dian Yu, Jeffrey Zhao, et al. for their groundbreaking Tree of Thoughts paper, which provides the reasoning framework for this project.
+
+This project's framework is based on the official implementation of the paper [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/abs/2305.10601).
+
+The core ToT logic (`src/tot/methods/bfs.py` and `src/tot/models.py`) is adapted from the original `princeton-nlp/tree-of-thought-llm` repository, which is available under the MIT License.
