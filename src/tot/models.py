@@ -1,8 +1,14 @@
 import os
 import backoff
-from anthropic import Anthropic
 
-# Try to import OpenAI (handle both old and new SDK)
+# Anthropic setup
+from anthropic import Anthropic
+anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
+anthropic_client = None
+if anthropic_key:
+    anthropic_client = Anthropic(api_key=anthropic_key)
+
+# OpenAI setup - Try to import (handle both old and new SDK)
 try:
     from openai import OpenAI
     OPENAI_V1 = True
@@ -17,15 +23,22 @@ except ImportError:
     if api_key:
         openai.api_key = api_key
 
+# Gemini setup
+try:
+    import google.generativeai as genai
+    GEMINI_AVAILABLE = True
+    google_api_key = os.getenv("GOOGLE_API_KEY", "")
+    if google_api_key:
+        genai.configure(api_key=google_api_key)
+    else:
+        GEMINI_AVAILABLE = False
+except ImportError:
+    GEMINI_AVAILABLE = False
+    print("Warning: google-generativeai not installed. Install with: pip install google-generativeai")
+
+# Token tracking
 completion_tokens = prompt_tokens = 0
 
-# Anthropic setup
-anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
-anthropic_client = None
-if anthropic_key:
-    anthropic_client = Anthropic(api_key=anthropic_key)
-else:
-    print("Warning: ANTHROPIC_API_KEY is not set")
 
 def gpt(prompt, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop=None) -> list:
     """Call OpenAI API - supports both old and new SDK versions"""
@@ -57,6 +70,7 @@ def gpt(prompt, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop=None)
         messages = [{"role": "user", "content": prompt}]
         return chatgpt_legacy(messages, model=model, temperature=temperature, max_tokens=max_tokens, n=n, stop=stop)
 
+
 def chatgpt_legacy(messages, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop=None) -> list:
     """Legacy OpenAI API (pre-v1.0) - kept for compatibility"""
     global completion_tokens, prompt_tokens
@@ -82,6 +96,7 @@ def chatgpt_legacy(messages, model="gpt-4", temperature=0.7, max_tokens=1000, n=
         prompt_tokens += res.usage.prompt_tokens
     
     return outputs
+
 
 def claude(prompt, model="claude-sonnet-4-20250514", temperature=0.7, max_tokens=1000, n=1, stop=None) -> list:
     """Call Claude API - supports Anthropic models"""
@@ -109,15 +124,66 @@ def claude(prompt, model="claude-sonnet-4-20250514", temperature=0.7, max_tokens
     
     return outputs
 
+
+def gemini(prompt, model="gemini-1.5-pro", temperature=0.7, max_tokens=1000, n=1, stop=None) -> list:
+    """Call Gemini API - supports Google Gemini models"""
+    global completion_tokens, prompt_tokens
+    
+    if not GEMINI_AVAILABLE:
+        raise ValueError("Gemini not available. Install with: pip install google-generativeai")
+    
+    if not os.getenv("GOOGLE_API_KEY"):
+        raise ValueError("GOOGLE_API_KEY not set. Please set it as an environment variable.")
+    
+    outputs = []
+    for _ in range(n):
+        try:
+            # Create model instance
+            genai_model = genai.GenerativeModel(model)
+            
+            # Generate content
+            response = genai_model.generate_content(
+                prompt,
+                generation_config={
+                    'temperature': temperature,
+                    'max_output_tokens': max_tokens,
+                }
+            )
+            
+            # Extract text
+            text = response.text if hasattr(response, 'text') else ""
+            outputs.append(text)
+            
+            # Track tokens (Gemini uses different names)
+            if hasattr(response, 'usage_metadata'):
+                completion_tokens += response.usage_metadata.candidates_token_count
+                prompt_tokens += response.usage_metadata.prompt_token_count
+            
+        except Exception as e:
+            print(f"Gemini API error: {e}")
+            outputs.append(f"ERROR: {str(e)}")
+    
+    return outputs
+
+
 def get_model(args):
     """
     Factory function to return a model callable based on args.backend
-    Compatible with both OpenAI v1.0+ and legacy SDK
+    Compatible with OpenAI, Claude, and Gemini
     """
     def model_callable(prompt, n=1, stop=None):
         # Determine which API to use based on model name
         if args.backend.startswith('claude'):
             return claude(
+                prompt,
+                model=args.backend,
+                temperature=args.temperature,
+                max_tokens=1000,
+                n=n,
+                stop=stop
+            )
+        elif args.backend.startswith('gemini'):
+            return gemini(
                 prompt,
                 model=args.backend,
                 temperature=args.temperature,
@@ -137,6 +203,7 @@ def get_model(args):
             )
     
     return model_callable
+
 
 def gpt_usage(backend="gpt-4"):
     """Track token usage and calculate cost"""
@@ -159,6 +226,17 @@ def gpt_usage(backend="gpt-4"):
         cost = completion_tokens / 1000 * 0.015 + prompt_tokens / 1000 * 0.075
     elif backend.startswith("claude-haiku"):
         cost = completion_tokens / 1000 * 0.00025 + prompt_tokens / 1000 * 0.00125
+    elif backend.startswith("gemini-1.5-pro"):
+        # Gemini 1.5 Pro pricing (input/output per 1M tokens)
+        # Input: $1.25, Output: $5.00 per 1M tokens
+        cost = completion_tokens / 1000000 * 5.00 + prompt_tokens / 1000000 * 1.25
+    elif backend.startswith("gemini-1.5-flash"):
+        # Gemini 1.5 Flash pricing (cheaper)
+        # Input: $0.075, Output: $0.30 per 1M tokens
+        cost = completion_tokens / 1000000 * 0.30 + prompt_tokens / 1000000 * 0.075
+    elif backend.startswith("gemini"):
+        # Generic Gemini pricing (use Pro as default)
+        cost = completion_tokens / 1000000 * 5.00 + prompt_tokens / 1000000 * 1.25
     else:
         cost = 0  # Unknown model
     

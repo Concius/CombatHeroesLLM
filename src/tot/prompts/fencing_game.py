@@ -1,4 +1,3 @@
-# This is the new "Parallel Universe" prompt (Claude's Idea 3)
 # This replaces the simple CoT prompt.
 propose_prompt = """
 You are an expert fencer in a strategic duel.

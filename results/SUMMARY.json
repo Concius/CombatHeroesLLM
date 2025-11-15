@@ -1,0 +1,35 @@
+{
+    "total_games": 1,
+    "outcomes": {
+        "p1_wins": 0,
+        "p2_wins": 0,
+        "draws": 1,
+        "p1_win_rate": 0.0,
+        "p2_win_rate": 0.0
+    },
+    "game_length": {
+        "average": 20.0,
+        "min": 20,
+        "max": 20
+    },
+    "resources": {
+        "total_tokens": 29675,
+        "avg_tokens_per_game": 29675.0,
+        "total_cost_usd": 0.323901,
+        "avg_cost_per_game": 0.323901
+    },
+    "actions": {
+        "player1": {
+            "KICKS": 11,
+            "DEFEND": 3,
+            "FEINT": 5,
+            "ATTACK": 1
+        },
+        "player2": {
+            "FEINT": 3,
+            "DEFEND": 4,
+            "KICKS": 11,
+            "ATTACK": 2
+        }
+    }
+}

@@ -5,23 +5,77 @@ from src.tot.prompts.fencing_game import propose_prompt, value_prompt
 
 class FencingTask(Task):
     """
-    Task class for a 2-player fencing game with balanced rock-paper-scissors-style rules.
-    Manages game state and provides prompt generation.
+    Task class for a 2-player fencing game with multiple game modes.
+    Supports: standard, no_kick, first_blood, action_points
     
-    FIXED VERSION - Corrected debuff logic and complete game rules
+    UPDATED VERSION - Multiple game modes with configurable rules
     """
     
-    def __init__(self):
-        super().__init__()
-        self.state = {
-            'p1_hp': 3,
-            'p2_hp': 3,
-            'p1_debuff': None,  # e.g., 'Cannot Attack'
-            'p2_debuff': None,
-            'turn': 0
+    # Game mode configurations
+    GAME_MODES = {
+        'standard': {
+            'hp': 3,
+            'action_points': None,  # Infinite actions
+            'actions': ['ATTACK', 'DEFEND', 'KICKS', 'FEINT'],
+            'action_costs': None,
+            'win_condition': 'hp_zero',
+            'debuffs': True,
+            'description': 'Classic mode: 3 HP, 4 actions, debuffs enabled'
+        },
+        'no_kick': {
+            'hp': 3,
+            'action_points': None,
+            'actions': ['ATTACK', 'DEFEND', 'FEINT'],
+            'action_costs': None,
+            'win_condition': 'hp_zero',
+            'debuffs': True,
+            'description': '3-way RPS: 3 HP, 3 actions (no KICKS), debuffs enabled'
+        },
+        'first_blood': {
+            'hp': 3,
+            'action_points': None,
+            'actions': ['ATTACK', 'DEFEND', 'KICKS', 'FEINT'],
+            'action_costs': None,
+            'win_condition': 'first_damage',
+            'debuffs': True,
+            'description': 'First to deal HP damage wins'
+        },
+        'action_points': {
+            'hp': 3,
+            'action_points': 5,
+            'actions': ['ATTACK', 'DEFEND', 'KICKS', 'FEINT'],
+            'action_costs': {'ATTACK': 2, 'DEFEND': 1, 'KICKS': 2, 'FEINT': 1},
+            'win_condition': 'ap_zero_or_hp_zero',
+            'debuffs': False,  # No debuffs in AP mode
+            'description': 'Resource management: 5 AP, actions cost AP, no debuffs'
         }
-        self.base_actions = ['ATTACK', 'DEFEND', 'KICKS', 'FEINT']
-        self.game_history = []  # Track all moves for analysis
+    }
+    
+    def __init__(self, game_mode='standard'):
+        super().__init__()
+        
+        # Validate game mode
+        if game_mode not in self.GAME_MODES:
+            raise ValueError(f"Unknown game mode: {game_mode}. "
+                           f"Valid modes: {list(self.GAME_MODES.keys())}")
+        
+        self.game_mode = game_mode
+        self.config = self.GAME_MODES[game_mode]
+        
+        # Initialize state based on game mode
+        self.state = {
+            'p1_hp': self.config['hp'],
+            'p2_hp': self.config['hp'],
+            'p1_ap': self.config['action_points'],
+            'p2_ap': self.config['action_points'],
+            'p1_debuff': None,
+            'p2_debuff': None,
+            'turn': 0,
+            'first_damage_dealt': False  # For first_blood mode
+        }
+        
+        self.base_actions = self.config['actions']
+        self.game_history = []
 
     def get_state_string(self, player_id: int) -> str:
         """Serializes state to a string for the player."""
@@ -30,99 +84,160 @@ class FencingTask(Task):
         my_debuff = self.state['p1_debuff'] if player_id == 1 else self.state['p2_debuff']
         
         state_string = f"You are Player {player_id}.\n"
+        state_string += f"Game Mode: {self.game_mode.upper()} - {self.config['description']}\n"
         state_string += f"Turn: {self.state['turn']}\n"
         state_string += f"CURRENT STATE:\n"
         state_string += f"Your HP: {my_hp}\n"
         state_string += f"Opponent HP: {op_hp}\n"
+        
+        # Add AP info if using action points mode
+        if self.config['action_points'] is not None:
+            my_ap = self.state['p1_ap'] if player_id == 1 else self.state['p2_ap']
+            op_ap = self.state['p2_ap'] if player_id == 1 else self.state['p1_ap']
+            state_string += f"Your Action Points: {my_ap}\n"
+            state_string += f"Opponent Action Points: {op_ap}\n"
+            state_string += f"Action Costs: {self.config['action_costs']}\n"
+        
         state_string += f"Your Status: {my_debuff if my_debuff else 'Normal'}\n"
+        
         return state_string
 
     def get_available_actions(self, player_id: int) -> list:
-        """Returns valid actions, considering debuffs."""
+        """Returns valid actions, considering debuffs and action points."""
         available_actions = list(self.base_actions)
         my_debuff = self.state['p1_debuff'] if player_id == 1 else self.state['p2_debuff']
+        my_ap = self.state['p1_ap'] if player_id == 1 else self.state['p2_ap']
         
-        # Remove actions that are blocked by debuffs
-        if my_debuff == 'Cannot Attack':
-            if 'ATTACK' in available_actions: 
+        # Remove actions blocked by debuffs (if debuffs enabled)
+        if self.config['debuffs'] and my_debuff:
+            if my_debuff == 'Cannot Attack' and 'ATTACK' in available_actions:
                 available_actions.remove('ATTACK')
-        elif my_debuff == 'Cannot Defend':
-            if 'DEFEND' in available_actions: 
+            elif my_debuff == 'Cannot Defend' and 'DEFEND' in available_actions:
                 available_actions.remove('DEFEND')
-        elif my_debuff == 'Cannot Kick':
-            if 'KICKS' in available_actions: 
+            elif my_debuff == 'Cannot Kick' and 'KICKS' in available_actions:
                 available_actions.remove('KICKS')
-        elif my_debuff == 'Cannot Feint':
-            if 'FEINT' in available_actions: 
+            elif my_debuff == 'Cannot Feint' and 'FEINT' in available_actions:
                 available_actions.remove('FEINT')
-                
+        
+        # Remove actions that cost more AP than available (if using AP mode)
+        if self.config['action_points'] is not None and self.config['action_costs']:
+            available_actions = [
+                action for action in available_actions
+                if self.config['action_costs'][action] <= my_ap
+            ]
+        
+        # Ensure at least one action is available
+        if not available_actions:
+            # In AP mode, if no actions available, player loses
+            return []
+        
         return available_actions
 
     def resolve_turn(self, p1_action: str, p2_action: str) -> str:
         """
-        Applies the balanced game rules and updates the state.
-        
-        FIXED: Debuffs now apply BEFORE clearing, and new debuffs are set AFTER resolution.
-        
-        Complete Rock-Paper-Scissors rules (4 actions = 6 unique matchups):
-        1. ATTACK beats FEINT (Feinter loses 1 HP)
-        2. FEINT beats KICKS (Kicker gets 'Cannot Kick')
-        3. KICKS beats DEFEND (Defender loses 1 HP)
-        4. DEFEND beats ATTACK (Attacker gets 'Cannot Attack')
-        5. ATTACK beats KICKS (Kicker gets 'Cannot Kick') - NEW
-        6. DEFEND beats FEINT (Feinter gets 'Cannot Feint') - NEW
+        Applies game rules based on the current game mode.
+        Returns game status: 'Continue', 'P1 Wins', 'P2 Wins', 'Draw'
         """
         
-        # Store current debuffs (they should already be enforced by get_available_actions)
-        # We'll clear them AFTER applying the turn's effects
+        # Deduct action points if using AP mode
+        if self.config['action_points'] is not None and self.config['action_costs']:
+            self.state['p1_ap'] -= self.config['action_costs'][p1_action]
+            self.state['p2_ap'] -= self.config['action_costs'][p2_action]
         
         # Initialize new debuffs
         new_p1_debuff = None
         new_p2_debuff = None
         
-        # Apply game rules - Complete set of 6 matchups
+        # Track if damage was dealt this turn (for first_blood mode)
+        damage_dealt_this_turn = False
         
-        # Rule 1: ATTACK beats FEINT
-        if p1_action == 'ATTACK' and p2_action == 'FEINT':
-            self.state['p2_hp'] -= 1
-        elif p2_action == 'ATTACK' and p1_action == 'FEINT':
-            self.state['p1_hp'] -= 1
+        # Apply game rules based on mode
+        if self.game_mode == 'no_kick':
+            # 3-way RPS: ATTACK beats FEINT, DEFEND beats ATTACK, FEINT beats DEFEND
             
-        # Rule 2: FEINT beats KICKS
-        elif p1_action == 'FEINT' and p2_action == 'KICKS':
-            new_p2_debuff = 'Cannot Kick'
-        elif p2_action == 'FEINT' and p1_action == 'KICKS':
-            new_p1_debuff = 'Cannot Kick'
+            # ATTACK beats FEINT (damage)
+            if p1_action == 'ATTACK' and p2_action == 'FEINT':
+                self.state['p2_hp'] -= 1
+                damage_dealt_this_turn = True
+            elif p2_action == 'ATTACK' and p1_action == 'FEINT':
+                self.state['p1_hp'] -= 1
+                damage_dealt_this_turn = True
             
-        # Rule 3: KICKS beats DEFEND
-        elif p1_action == 'KICKS' and p2_action == 'DEFEND':
-            self.state['p2_hp'] -= 1
-        elif p2_action == 'KICKS' and p1_action == 'DEFEND':
-            self.state['p1_hp'] -= 1
+            # DEFEND beats ATTACK (debuff if enabled)
+            elif p1_action == 'DEFEND' and p2_action == 'ATTACK':
+                if self.config['debuffs']:
+                    new_p2_debuff = 'Cannot Attack'
+            elif p2_action == 'DEFEND' and p1_action == 'ATTACK':
+                if self.config['debuffs']:
+                    new_p1_debuff = 'Cannot Attack'
             
-        # Rule 4: DEFEND beats ATTACK
-        elif p1_action == 'DEFEND' and p2_action == 'ATTACK':
-            new_p2_debuff = 'Cannot Attack'
-        elif p2_action == 'DEFEND' and p1_action == 'ATTACK':
-            new_p1_debuff = 'Cannot Attack'
+            # FEINT beats DEFEND (debuff if enabled)
+            elif p1_action == 'FEINT' and p2_action == 'DEFEND':
+                if self.config['debuffs']:
+                    new_p2_debuff = 'Cannot Defend'
+            elif p2_action == 'FEINT' and p1_action == 'DEFEND':
+                if self.config['debuffs']:
+                    new_p1_debuff = 'Cannot Defend'
         
-        # Rule 5: ATTACK beats KICKS (NEW - completes the cycle)
-        elif p1_action == 'ATTACK' and p2_action == 'KICKS':
-            new_p2_debuff = 'Cannot Kick'
-        elif p2_action == 'ATTACK' and p1_action == 'KICKS':
-            new_p1_debuff = 'Cannot Kick'
+        else:
+            # Standard, first_blood, and action_points modes use full 6-rule system
+            
+            # Rule 1: ATTACK beats FEINT (damage)
+            if p1_action == 'ATTACK' and p2_action == 'FEINT':
+                self.state['p2_hp'] -= 1
+                damage_dealt_this_turn = True
+            elif p2_action == 'ATTACK' and p1_action == 'FEINT':
+                self.state['p1_hp'] -= 1
+                damage_dealt_this_turn = True
+            
+            # Rule 2: FEINT beats KICKS (debuff)
+            elif p1_action == 'FEINT' and p2_action == 'KICKS':
+                if self.config['debuffs']:
+                    new_p2_debuff = 'Cannot Kick'
+            elif p2_action == 'FEINT' and p1_action == 'KICKS':
+                if self.config['debuffs']:
+                    new_p1_debuff = 'Cannot Kick'
+            
+            # Rule 3: KICKS beats DEFEND (damage)
+            elif p1_action == 'KICKS' and p2_action == 'DEFEND':
+                self.state['p2_hp'] -= 1
+                damage_dealt_this_turn = True
+            elif p2_action == 'KICKS' and p1_action == 'DEFEND':
+                self.state['p1_hp'] -= 1
+                damage_dealt_this_turn = True
+            
+            # Rule 4: DEFEND beats ATTACK (debuff)
+            elif p1_action == 'DEFEND' and p2_action == 'ATTACK':
+                if self.config['debuffs']:
+                    new_p2_debuff = 'Cannot Attack'
+            elif p2_action == 'DEFEND' and p1_action == 'ATTACK':
+                if self.config['debuffs']:
+                    new_p1_debuff = 'Cannot Attack'
+            
+            # Rule 5: ATTACK beats KICKS (debuff)
+            elif p1_action == 'ATTACK' and p2_action == 'KICKS':
+                if self.config['debuffs']:
+                    new_p2_debuff = 'Cannot Kick'
+            elif p2_action == 'ATTACK' and p1_action == 'KICKS':
+                if self.config['debuffs']:
+                    new_p1_debuff = 'Cannot Kick'
+            
+            # Rule 6: DEFEND beats FEINT (debuff)
+            elif p1_action == 'DEFEND' and p2_action == 'FEINT':
+                if self.config['debuffs']:
+                    new_p2_debuff = 'Cannot Feint'
+            elif p2_action == 'DEFEND' and p1_action == 'FEINT':
+                if self.config['debuffs']:
+                    new_p1_debuff = 'Cannot Feint'
         
-        # Rule 6: DEFEND beats FEINT (NEW - completes the cycle)
-        elif p1_action == 'DEFEND' and p2_action == 'FEINT':
-            new_p2_debuff = 'Cannot Feint'
-        elif p2_action == 'DEFEND' and p1_action == 'FEINT':
-            new_p1_debuff = 'Cannot Feint'
+        # Update debuffs (clear old, apply new)
+        if self.config['debuffs']:
+            self.state['p1_debuff'] = new_p1_debuff
+            self.state['p2_debuff'] = new_p2_debuff
         
-        # If identical moves, they cancel out (no action needed)
-        
-        # NOW update debuffs (clearing old ones and applying new ones)
-        self.state['p1_debuff'] = new_p1_debuff
-        self.state['p2_debuff'] = new_p2_debuff
+        # Mark if first damage was dealt (for first_blood mode)
+        if damage_dealt_this_turn:
+            self.state['first_damage_dealt'] = True
         
         # Increment turn counter
         self.state['turn'] += 1
@@ -134,11 +249,35 @@ class FencingTask(Task):
             'p2_action': p2_action,
             'p1_hp': self.state['p1_hp'],
             'p2_hp': self.state['p2_hp'],
+            'p1_ap': self.state['p1_ap'],
+            'p2_ap': self.state['p2_ap'],
             'p1_debuff': self.state['p1_debuff'],
             'p2_debuff': self.state['p2_debuff']
         })
         
-        # Check for win/loss conditions
+        # Check win conditions based on game mode
+        return self._check_win_condition()
+    
+    def _check_win_condition(self) -> str:
+        """Check win condition based on game mode."""
+        
+        # First Blood: Win on first damage dealt
+        if self.config['win_condition'] == 'first_damage' and self.state['first_damage_dealt']:
+            if self.state['p1_hp'] < 3:  # P2 damaged P1
+                return 'P2 Wins (First Blood)'
+            elif self.state['p2_hp'] < 3:  # P1 damaged P2
+                return 'P1 Wins (First Blood)'
+        
+        # Action Points mode: Lose if AP reaches 0
+        if self.config['win_condition'] == 'ap_zero_or_hp_zero':
+            if self.state['p1_ap'] <= 0 and self.state['p2_ap'] <= 0:
+                return 'Draw (Both Out of AP)'
+            elif self.state['p1_ap'] <= 0:
+                return 'P2 Wins (P1 Out of AP)'
+            elif self.state['p2_ap'] <= 0:
+                return 'P1 Wins (P2 Out of AP)'
+        
+        # Standard HP check (applies to all modes)
         if self.state['p1_hp'] <= 0 and self.state['p2_hp'] <= 0:
             return 'Draw'
         elif self.state['p1_hp'] <= 0:
@@ -191,10 +330,13 @@ class FencingTask(Task):
     def reset(self):
         """Reset game state for a new game"""
         self.state = {
-            'p1_hp': 3,
-            'p2_hp': 3,
+            'p1_hp': self.config['hp'],
+            'p2_hp': self.config['hp'],
+            'p1_ap': self.config['action_points'],
+            'p2_ap': self.config['action_points'],
             'p1_debuff': None,
             'p2_debuff': None,
-            'turn': 0
+            'turn': 0,
+            'first_damage_dealt': False
         }
         self.game_history = []
