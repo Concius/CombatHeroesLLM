@@ -23,6 +23,22 @@ except ImportError:
     if api_key:
         openai.api_key = api_key
 
+# DeepSeek setup
+try:
+    from openai import OpenAI as DeepSeekClient
+    DEEPSEEK_AVAILABLE = True
+    deepseek_key = os.getenv("DEEPSEEK_API_KEY", "")
+    if deepseek_key:
+        deepseek_client = DeepSeekClient(
+            api_key=deepseek_key,
+            base_url="https://api.deepseek.com/v1"
+        )
+    else:
+        DEEPSEEK_AVAILABLE = False
+except ImportError:
+    DEEPSEEK_AVAILABLE = False
+    print("Warning: openai not installed. Install with: pip install openai")
+
 # Gemini setup
 try:
     import google.generativeai as genai
@@ -38,6 +54,34 @@ except ImportError:
 
 # Token tracking
 completion_tokens = prompt_tokens = 0
+
+
+def deepseek(prompt, model="deepseek-chat", temperature=0.7, max_tokens=1000, n=1, stop=None) -> list:
+    """Call DeepSeek API - uses OpenAI-compatible API"""
+    global completion_tokens, prompt_tokens
+    
+    if not DEEPSEEK_AVAILABLE:
+        raise ValueError("DeepSeek not available. Make sure openai package is installed and DEEPSEEK_API_KEY is set.")
+    
+    if deepseek_client is None:
+        raise ValueError("DEEPSEEK_API_KEY not set. Please set it as an environment variable.")
+    
+    outputs = []
+    for _ in range(n):
+        response = deepseek_client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stop=stop
+        )
+        outputs.append(response.choices[0].message.content)
+        
+        # Track tokens
+        completion_tokens += response.usage.completion_tokens
+        prompt_tokens += response.usage.prompt_tokens
+    
+    return outputs
 
 
 def gpt(prompt, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop=None) -> list:
@@ -169,7 +213,7 @@ def gemini(prompt, model="gemini-1.5-pro", temperature=0.7, max_tokens=1000, n=1
 def get_model(args):
     """
     Factory function to return a model callable based on args.backend
-    Compatible with OpenAI, Claude, and Gemini
+    Compatible with OpenAI, Claude, Gemini, and DeepSeek
     """
     def model_callable(prompt, n=1, stop=None):
         # Determine which API to use based on model name
@@ -184,6 +228,15 @@ def get_model(args):
             )
         elif args.backend.startswith('gemini'):
             return gemini(
+                prompt,
+                model=args.backend,
+                temperature=args.temperature,
+                max_tokens=1000,
+                n=n,
+                stop=stop
+            )
+        elif args.backend.startswith('deepseek'):
+            return deepseek(
                 prompt,
                 model=args.backend,
                 temperature=args.temperature,
@@ -237,6 +290,10 @@ def gpt_usage(backend="gpt-4"):
     elif backend.startswith("gemini"):
         # Generic Gemini pricing (use Pro as default)
         cost = completion_tokens / 1000000 * 5.00 + prompt_tokens / 1000000 * 1.25
+    elif backend.startswith("deepseek"):
+        # DeepSeek pricing (very affordable)
+        # Input: $0.00014 per 1K tokens, Output: $0.00028 per 1K tokens
+        cost = completion_tokens / 1000 * 0.00028 + prompt_tokens / 1000 * 0.00014
     else:
         cost = 0  # Unknown model
     

@@ -1,0 +1,200 @@
+{
+    "game_info": {
+        "game_mode": "action_points",
+        "mode_description": "Resource management: 5 AP, actions cost AP, no debuffs",
+        "p1_model": "gemini-2.0-flash",
+        "p2_model": "claude-sonnet-4-20250514",
+        "temperature": 0.7,
+        "max_turns": 20,
+        "result": "P1 Wins (P2 Out of AP)",
+        "total_turns": 4,
+        "winner": "P1"
+    },
+    "token_usage": {
+        "completion_tokens": 2071,
+        "prompt_tokens": 4298,
+        "cost": 0.0157275
+    },
+    "game_history": [
+        {
+            "turn": 1,
+            "p1_action": "DEFEND",
+            "p2_action": "KICKS",
+            "p1_hp": 2,
+            "p2_hp": 3,
+            "p1_ap": 4,
+            "p2_ap": 3,
+            "p1_debuff": null,
+            "p2_debuff": null
+        },
+        {
+            "turn": 2,
+            "p1_action": "FEINT",
+            "p2_action": "FEINT",
+            "p1_hp": 2,
+            "p2_hp": 3,
+            "p1_ap": 3,
+            "p2_ap": 2,
+            "p1_debuff": null,
+            "p2_debuff": null
+        },
+        {
+            "turn": 3,
+            "p1_action": "DEFEND",
+            "p2_action": "FEINT",
+            "p1_hp": 2,
+            "p2_hp": 3,
+            "p1_ap": 2,
+            "p2_ap": 1,
+            "p1_debuff": null,
+            "p2_debuff": null
+        },
+        {
+            "turn": 4,
+            "p1_action": "DEFEND",
+            "p2_action": "DEFEND",
+            "p1_hp": 2,
+            "p2_hp": 3,
+            "p1_ap": 1,
+            "p2_ap": 0,
+            "p1_debuff": null,
+            "p2_debuff": null
+        }
+    ],
+    "turn_by_turn_log": [
+        {
+            "turn": 1,
+            "p1_model": "gemini-2.0-flash",
+            "p1_prompt": "\nYou are an expert fencer in a strategic duel.\nYour task is to choose your next action by simulating three possible 'parallel universes' of what might happen next.\n\n---\nGAME STATE & RULES:\nYou are Player 1.\nGame Mode: ACTION_POINTS - Resource management: 5 AP, actions cost AP, no debuffs\nTurn: 0\nCURRENT STATE:\nYour HP: 3\nOpponent HP: 3\nYour Action Points: 5\nOpponent Action Points: 5\nAction Costs: {'ATTACK': 2, 'DEFEND': 1, 'KICKS': 2, 'FEINT': 1}\nYour Status: Normal\n\nAvailable Actions: ['ATTACK', 'DEFEND', 'KICKS', 'FEINT']\n\nSTRATEGIC RULES (Rock-Paper-Scissors dynamic):\n- ATTACK beats FEINT (The Feinter loses 1 HP)\n- FEINT beats KICKS (The Kicker gets 'Cannot Kick' for 1 turn)\n- KICKS beats DEFEND (The Defender loses 1 HP)\n- DEFEND beats ATTACK (The Attacker gets 'Cannot Attack' for 1 turn)\n- Identical moves cancel out.\n\n---\nINSTRUCTIONS:\nGenerate 3 distinct 'universes' (trajectories). For each, propose one of your available actions and then predict your opponent's *most likely* counter-move.\nEvaluate the outcome of this 2-move exchange.\n\nUniverse 1:\n- My Action: [ACTION 1]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 2:\n- My Action: [ACTION 2]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 3:\n- My Action: [ACTION 3]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\n---\nFINAL RECOMMENDATION:\nBased on your 3 simulations, which *first action* is the best?\nOutput your single best action from the \"Available Actions\" list and nothing else.\n",
+            "p1_thoughts": "Here are three possible universes for my next move:\n\nUniverse 1:\n- My Action: DEFEND\n- Opponent's Likely Response: ATTACK\n- Outcome: I block the attack, and the opponent gets 'Cannot Attack' for 1 turn. My HP: 3, Opponent HP: 3, Opponent Status: Cannot Attack. This is a good outcome as it limits the opponent's offensive capabilities in the next turn, giving me an advantage.\n\nUniverse 2:\n- My Action: ATTACK\n- Opponent's Likely Response: DEFEND\n- Outcome: The opponent blocks my attack, and I get 'Cannot Attack' for 1 turn. My HP: 3, Opponent HP: 3, My Status: Cannot Attack. This is a bad outcome as it limits my offensive capabilities in the next turn.\n\nUniverse 3:\n- My Action: FEINT\n- Opponent's Likely Response: DEFEND\n- Outcome: Nothing happens as FEINT vs DEFEND cancels out. My HP: 3, Opponent HP: 3, No debuffs. This is a neutral outcome, as it doesn't worsen my situation, but also doesn't improve it.\n\nFINAL RECOMMENDATION:\nDEFEND\n",
+            "p1_action": "DEFEND",
+            "p1_available_actions": [
+                "ATTACK",
+                "DEFEND",
+                "KICKS",
+                "FEINT"
+            ],
+            "p2_model": "claude-sonnet-4-20250514",
+            "p2_prompt": "\nYou are an expert fencer in a strategic duel.\nYour task is to choose your next action by simulating three possible 'parallel universes' of what might happen next.\n\n---\nGAME STATE & RULES:\nYou are Player 2.\nGame Mode: ACTION_POINTS - Resource management: 5 AP, actions cost AP, no debuffs\nTurn: 0\nCURRENT STATE:\nYour HP: 3\nOpponent HP: 3\nYour Action Points: 5\nOpponent Action Points: 5\nAction Costs: {'ATTACK': 2, 'DEFEND': 1, 'KICKS': 2, 'FEINT': 1}\nYour Status: Normal\n\nAvailable Actions: ['ATTACK', 'DEFEND', 'KICKS', 'FEINT']\n\nSTRATEGIC RULES (Rock-Paper-Scissors dynamic):\n- ATTACK beats FEINT (The Feinter loses 1 HP)\n- FEINT beats KICKS (The Kicker gets 'Cannot Kick' for 1 turn)\n- KICKS beats DEFEND (The Defender loses 1 HP)\n- DEFEND beats ATTACK (The Attacker gets 'Cannot Attack' for 1 turn)\n- Identical moves cancel out.\n\n---\nINSTRUCTIONS:\nGenerate 3 distinct 'universes' (trajectories). For each, propose one of your available actions and then predict your opponent's *most likely* counter-move.\nEvaluate the outcome of this 2-move exchange.\n\nUniverse 1:\n- My Action: [ACTION 1]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 2:\n- My Action: [ACTION 2]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 3:\n- My Action: [ACTION 3]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\n---\nFINAL RECOMMENDATION:\nBased on your 3 simulations, which *first action* is the best?\nOutput your single best action from the \"Available Actions\" list and nothing else.\n",
+            "p2_thoughts": "Universe 1:\n- My Action: ATTACK\n- Opponent's Likely Response: DEFEND\n- Outcome: DEFEND beats ATTACK, so I get 'Cannot Attack' for 1 turn. My HP: 3, Opponent HP: 3. This is bad for me as I lose offensive capability and spend 2 AP for no gain.\n\nUniverse 2:\n- My Action: FEINT\n- Opponent's Likely Response: ATTACK\n- Outcome: ATTACK beats FEINT, so I lose 1 HP. My HP: 2, Opponent HP: 3. This is bad for me as I take damage while only spending 1 AP vs their 2 AP, but I'm now at a health disadvantage.\n\nUniverse 3:\n- My Action: KICKS\n- Opponent's Likely Response: FEINT\n- Outcome: FEINT beats KICKS, so I get 'Cannot Kick' for 1 turn. My HP: 3, Opponent HP: 3. This is moderately bad as I lose kicking ability, but both players spend 2 AP and 1 AP respectively, giving me an AP efficiency advantage.\n\nKICKS",
+            "p2_action": "KICKS",
+            "p2_available_actions": [
+                "ATTACK",
+                "DEFEND",
+                "KICKS",
+                "FEINT"
+            ],
+            "game_status": "Continue",
+            "state_after_turn": {
+                "p1_hp": 2,
+                "p2_hp": 3,
+                "p1_ap": 4,
+                "p2_ap": 3,
+                "p1_debuff": null,
+                "p2_debuff": null,
+                "turn": 1,
+                "first_damage_dealt": true
+            }
+        },
+        {
+            "turn": 2,
+            "p1_model": "gemini-2.0-flash",
+            "p1_prompt": "\nYou are an expert fencer in a strategic duel.\nYour task is to choose your next action by simulating three possible 'parallel universes' of what might happen next.\n\n---\nGAME STATE & RULES:\nYou are Player 1.\nGame Mode: ACTION_POINTS - Resource management: 5 AP, actions cost AP, no debuffs\nTurn: 1\nCURRENT STATE:\nYour HP: 2\nOpponent HP: 3\nYour Action Points: 4\nOpponent Action Points: 3\nAction Costs: {'ATTACK': 2, 'DEFEND': 1, 'KICKS': 2, 'FEINT': 1}\nYour Status: Normal\n\nAvailable Actions: ['ATTACK', 'DEFEND', 'KICKS', 'FEINT']\n\nSTRATEGIC RULES (Rock-Paper-Scissors dynamic):\n- ATTACK beats FEINT (The Feinter loses 1 HP)\n- FEINT beats KICKS (The Kicker gets 'Cannot Kick' for 1 turn)\n- KICKS beats DEFEND (The Defender loses 1 HP)\n- DEFEND beats ATTACK (The Attacker gets 'Cannot Attack' for 1 turn)\n- Identical moves cancel out.\n\n---\nINSTRUCTIONS:\nGenerate 3 distinct 'universes' (trajectories). For each, propose one of your available actions and then predict your opponent's *most likely* counter-move.\nEvaluate the outcome of this 2-move exchange.\n\nUniverse 1:\n- My Action: [ACTION 1]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 2:\n- My Action: [ACTION 2]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 3:\n- My Action: [ACTION 3]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\n---\nFINAL RECOMMENDATION:\nBased on your 3 simulations, which *first action* is the best?\nOutput your single best action from the \"Available Actions\" list and nothing else.\n",
+            "p1_thoughts": "Here are the three simulated universes:\n\nUniverse 1:\n- My Action: ATTACK\n- Opponent's Likely Response: DEFEND\n- Outcome: I spend 2 AP, and the opponent spends 1 AP. I get 'Cannot Attack' next turn. My HP: 2, Opponent HP: 3. This is bad for me because I am now unable to attack and have fewer AP than my opponent.\n\nUniverse 2:\n- My Action: FEINT\n- Opponent's Likely Response: DEFEND\n- Outcome: I spend 1 AP, and the opponent spends 1 AP. No damage is done. My HP: 2, Opponent HP: 3. This is a neutral outcome.\n\nUniverse 3:\n- My Action: KICKS\n- Opponent's Likely Response: ATTACK\n- Outcome: I spend 2 AP, and the opponent spends 2 AP. No damage is done. My HP: 2, Opponent HP: 3. This is a neutral outcome.\n\nFINAL RECOMMENDATION:\nFEINT\n",
+            "p1_action": "FEINT",
+            "p1_available_actions": [
+                "ATTACK",
+                "DEFEND",
+                "KICKS",
+                "FEINT"
+            ],
+            "p2_model": "claude-sonnet-4-20250514",
+            "p2_prompt": "\nYou are an expert fencer in a strategic duel.\nYour task is to choose your next action by simulating three possible 'parallel universes' of what might happen next.\n\n---\nGAME STATE & RULES:\nYou are Player 2.\nGame Mode: ACTION_POINTS - Resource management: 5 AP, actions cost AP, no debuffs\nTurn: 1\nCURRENT STATE:\nYour HP: 3\nOpponent HP: 2\nYour Action Points: 3\nOpponent Action Points: 4\nAction Costs: {'ATTACK': 2, 'DEFEND': 1, 'KICKS': 2, 'FEINT': 1}\nYour Status: Normal\n\nAvailable Actions: ['ATTACK', 'DEFEND', 'KICKS', 'FEINT']\n\nSTRATEGIC RULES (Rock-Paper-Scissors dynamic):\n- ATTACK beats FEINT (The Feinter loses 1 HP)\n- FEINT beats KICKS (The Kicker gets 'Cannot Kick' for 1 turn)\n- KICKS beats DEFEND (The Defender loses 1 HP)\n- DEFEND beats ATTACK (The Attacker gets 'Cannot Attack' for 1 turn)\n- Identical moves cancel out.\n\n---\nINSTRUCTIONS:\nGenerate 3 distinct 'universes' (trajectories). For each, propose one of your available actions and then predict your opponent's *most likely* counter-move.\nEvaluate the outcome of this 2-move exchange.\n\nUniverse 1:\n- My Action: [ACTION 1]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 2:\n- My Action: [ACTION 2]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 3:\n- My Action: [ACTION 3]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\n---\nFINAL RECOMMENDATION:\nBased on your 3 simulations, which *first action* is the best?\nOutput your single best action from the \"Available Actions\" list and nothing else.\n",
+            "p2_thoughts": "Universe 1:\n- My Action: ATTACK\n- Opponent's Likely Response: DEFEND\n- Outcome: DEFEND beats ATTACK, so I get 'Cannot Attack' for 1 turn. My HP stays 3, opponent HP stays 2. Bad for me - I lose offensive capability and waste 2 AP while opponent only spends 1 AP.\n\nUniverse 2:\n- My Action: KICKS\n- Opponent's Likely Response: FEINT\n- Outcome: FEINT beats KICKS, so I get 'Cannot Kick' for 1 turn. My HP stays 3, opponent HP stays 2. Bad for me - I'm debuffed and both actions cost equal AP (2 vs 1), but I lose tactical flexibility.\n\nUniverse 3:\n- My Action: FEINT\n- Opponent's Likely Response: KICKS\n- Outcome: FEINT beats KICKS, so opponent gets 'Cannot Kick' for 1 turn. My HP stays 3, opponent HP stays 2. Good for me - I debuff opponent while spending less AP (1 vs 2), giving me both tactical and resource advantage.\n\nFEINT",
+            "p2_action": "FEINT",
+            "p2_available_actions": [
+                "ATTACK",
+                "DEFEND",
+                "KICKS",
+                "FEINT"
+            ],
+            "game_status": "Continue",
+            "state_after_turn": {
+                "p1_hp": 2,
+                "p2_hp": 3,
+                "p1_ap": 3,
+                "p2_ap": 2,
+                "p1_debuff": null,
+                "p2_debuff": null,
+                "turn": 2,
+                "first_damage_dealt": true
+            }
+        },
+        {
+            "turn": 3,
+            "p1_model": "gemini-2.0-flash",
+            "p1_prompt": "\nYou are an expert fencer in a strategic duel.\nYour task is to choose your next action by simulating three possible 'parallel universes' of what might happen next.\n\n---\nGAME STATE & RULES:\nYou are Player 1.\nGame Mode: ACTION_POINTS - Resource management: 5 AP, actions cost AP, no debuffs\nTurn: 2\nCURRENT STATE:\nYour HP: 2\nOpponent HP: 3\nYour Action Points: 3\nOpponent Action Points: 2\nAction Costs: {'ATTACK': 2, 'DEFEND': 1, 'KICKS': 2, 'FEINT': 1}\nYour Status: Normal\n\nAvailable Actions: ['ATTACK', 'DEFEND', 'KICKS', 'FEINT']\n\nSTRATEGIC RULES (Rock-Paper-Scissors dynamic):\n- ATTACK beats FEINT (The Feinter loses 1 HP)\n- FEINT beats KICKS (The Kicker gets 'Cannot Kick' for 1 turn)\n- KICKS beats DEFEND (The Defender loses 1 HP)\n- DEFEND beats ATTACK (The Attacker gets 'Cannot Attack' for 1 turn)\n- Identical moves cancel out.\n\n---\nINSTRUCTIONS:\nGenerate 3 distinct 'universes' (trajectories). For each, propose one of your available actions and then predict your opponent's *most likely* counter-move.\nEvaluate the outcome of this 2-move exchange.\n\nUniverse 1:\n- My Action: [ACTION 1]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 2:\n- My Action: [ACTION 2]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 3:\n- My Action: [ACTION 3]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\n---\nFINAL RECOMMENDATION:\nBased on your 3 simulations, which *first action* is the best?\nOutput your single best action from the \"Available Actions\" list and nothing else.\n",
+            "p1_thoughts": "Here are the three simulated universes:\n\nUniverse 1:\n- My Action: ATTACK\n- Opponent's Likely Response: DEFEND\n- Outcome: I spend 2 AP, they spend 1 AP. I get 'Cannot Attack' for 1 turn. Our HPs remain the same (You: 2, Opponent: 3). This is bad for me because I lose an action point and become restricted on my next turn.\n\nUniverse 2:\n- My Action: FEINT\n- Opponent's Likely Response: ATTACK\n- Outcome: I spend 1 AP, they spend 2 AP. They win the exchange, and I lose 1 HP. The new HP totals are You: 1, Opponent: 3. This is very bad for me as I'm now one hit away from losing.\n\nUniverse 3:\n- My Action: KICKS\n- Opponent's Likely Response: DEFEND\n- Outcome: I spend 2 AP, they spend 1 AP. They win the exchange, and I lose 1 HP. The new HP totals are You: 1, Opponent: 3. This is very bad for me as I'm now one hit away from losing.\n\nFINAL RECOMMENDATION:\nDEFEND\n",
+            "p1_action": "DEFEND",
+            "p1_available_actions": [
+                "ATTACK",
+                "DEFEND",
+                "KICKS",
+                "FEINT"
+            ],
+            "p2_model": "claude-sonnet-4-20250514",
+            "p2_prompt": "\nYou are an expert fencer in a strategic duel.\nYour task is to choose your next action by simulating three possible 'parallel universes' of what might happen next.\n\n---\nGAME STATE & RULES:\nYou are Player 2.\nGame Mode: ACTION_POINTS - Resource management: 5 AP, actions cost AP, no debuffs\nTurn: 2\nCURRENT STATE:\nYour HP: 3\nOpponent HP: 2\nYour Action Points: 2\nOpponent Action Points: 3\nAction Costs: {'ATTACK': 2, 'DEFEND': 1, 'KICKS': 2, 'FEINT': 1}\nYour Status: Normal\n\nAvailable Actions: ['ATTACK', 'DEFEND', 'KICKS', 'FEINT']\n\nSTRATEGIC RULES (Rock-Paper-Scissors dynamic):\n- ATTACK beats FEINT (The Feinter loses 1 HP)\n- FEINT beats KICKS (The Kicker gets 'Cannot Kick' for 1 turn)\n- KICKS beats DEFEND (The Defender loses 1 HP)\n- DEFEND beats ATTACK (The Attacker gets 'Cannot Attack' for 1 turn)\n- Identical moves cancel out.\n\n---\nINSTRUCTIONS:\nGenerate 3 distinct 'universes' (trajectories). For each, propose one of your available actions and then predict your opponent's *most likely* counter-move.\nEvaluate the outcome of this 2-move exchange.\n\nUniverse 1:\n- My Action: [ACTION 1]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 2:\n- My Action: [ACTION 2]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 3:\n- My Action: [ACTION 3]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\n---\nFINAL RECOMMENDATION:\nBased on your 3 simulations, which *first action* is the best?\nOutput your single best action from the \"Available Actions\" list and nothing else.\n",
+            "p2_thoughts": "Universe 1:\n- My Action: ATTACK\n- Opponent's Likely Response: DEFEND\n- Outcome: My attack is countered by defend, I get 'Cannot Attack' for 1 turn. Bad outcome - I lose my primary offensive capability and waste 2 AP while opponent only spends 1 AP.\n\nUniverse 2:\n- My Action: KICKS\n- Opponent's Likely Response: FEINT\n- Outcome: My kicks are countered by feint, I get 'Cannot Kick' for 1 turn. Moderate outcome - I lose kicks ability but opponent only has 2 HP left, and I still retain attack option next turn.\n\nUniverse 3:\n- My Action: FEINT\n- Opponent's Likely Response: ATTACK\n- Outcome: My feint beats attack, opponent loses 1 HP and goes to 1 HP remaining. Excellent outcome - opponent is one hit away from defeat, and I only spent 1 AP while they spent 2 AP, giving me better resource positioning.\n\nFINAL RECOMMENDATION:\nFEINT",
+            "p2_action": "FEINT",
+            "p2_available_actions": [
+                "ATTACK",
+                "DEFEND",
+                "KICKS",
+                "FEINT"
+            ],
+            "game_status": "Continue",
+            "state_after_turn": {
+                "p1_hp": 2,
+                "p2_hp": 3,
+                "p1_ap": 2,
+                "p2_ap": 1,
+                "p1_debuff": null,
+                "p2_debuff": null,
+                "turn": 3,
+                "first_damage_dealt": true
+            }
+        },
+        {
+            "turn": 4,
+            "p1_model": "gemini-2.0-flash",
+            "p1_prompt": "\nYou are an expert fencer in a strategic duel.\nYour task is to choose your next action by simulating three possible 'parallel universes' of what might happen next.\n\n---\nGAME STATE & RULES:\nYou are Player 1.\nGame Mode: ACTION_POINTS - Resource management: 5 AP, actions cost AP, no debuffs\nTurn: 3\nCURRENT STATE:\nYour HP: 2\nOpponent HP: 3\nYour Action Points: 2\nOpponent Action Points: 1\nAction Costs: {'ATTACK': 2, 'DEFEND': 1, 'KICKS': 2, 'FEINT': 1}\nYour Status: Normal\n\nAvailable Actions: ['ATTACK', 'DEFEND', 'KICKS', 'FEINT']\n\nSTRATEGIC RULES (Rock-Paper-Scissors dynamic):\n- ATTACK beats FEINT (The Feinter loses 1 HP)\n- FEINT beats KICKS (The Kicker gets 'Cannot Kick' for 1 turn)\n- KICKS beats DEFEND (The Defender loses 1 HP)\n- DEFEND beats ATTACK (The Attacker gets 'Cannot Attack' for 1 turn)\n- Identical moves cancel out.\n\n---\nINSTRUCTIONS:\nGenerate 3 distinct 'universes' (trajectories). For each, propose one of your available actions and then predict your opponent's *most likely* counter-move.\nEvaluate the outcome of this 2-move exchange.\n\nUniverse 1:\n- My Action: [ACTION 1]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 2:\n- My Action: [ACTION 2]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 3:\n- My Action: [ACTION 3]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\n---\nFINAL RECOMMENDATION:\nBased on your 3 simulations, which *first action* is the best?\nOutput your single best action from the \"Available Actions\" list and nothing else.\n",
+            "p1_thoughts": "Here are the three simulated universes:\n\nUniverse 1:\n- My Action: ATTACK\n- Opponent's Likely Response: DEFEND (To avoid taking damage and inflict a debuff)\n- Outcome: I get 'Cannot Attack' for 1 turn. My HP: 2, Opponent HP: 3. This is bad for me as it limits my options next turn.\n\nUniverse 2:\n- My Action: DEFEND\n- Opponent's Likely Response: ATTACK (With only 1 AP, attack is his only option)\n- Outcome: I avoid taking damage and inflict 'Cannot Attack' on my opponent for 1 turn. My HP: 2, Opponent HP: 3. This is good for me as it limits his options next turn.\n\nUniverse 3:\n- My Action: FEINT\n- Opponent's Likely Response: ATTACK (With only 1 AP, attack is his only option)\n- Outcome: I lose 1 HP. My HP: 1, Opponent HP: 3. This is very bad for me as I am now one hit away from losing.\n\nFINAL RECOMMENDATION:\nDEFEND\n",
+            "p1_action": "DEFEND",
+            "p1_available_actions": [
+                "ATTACK",
+                "DEFEND",
+                "KICKS",
+                "FEINT"
+            ],
+            "p2_model": "claude-sonnet-4-20250514",
+            "p2_prompt": "\nYou are an expert fencer in a strategic duel.\nYour task is to choose your next action by simulating three possible 'parallel universes' of what might happen next.\n\n---\nGAME STATE & RULES:\nYou are Player 2.\nGame Mode: ACTION_POINTS - Resource management: 5 AP, actions cost AP, no debuffs\nTurn: 3\nCURRENT STATE:\nYour HP: 3\nOpponent HP: 2\nYour Action Points: 1\nOpponent Action Points: 2\nAction Costs: {'ATTACK': 2, 'DEFEND': 1, 'KICKS': 2, 'FEINT': 1}\nYour Status: Normal\n\nAvailable Actions: ['DEFEND', 'FEINT']\n\nSTRATEGIC RULES (Rock-Paper-Scissors dynamic):\n- ATTACK beats FEINT (The Feinter loses 1 HP)\n- FEINT beats KICKS (The Kicker gets 'Cannot Kick' for 1 turn)\n- KICKS beats DEFEND (The Defender loses 1 HP)\n- DEFEND beats ATTACK (The Attacker gets 'Cannot Attack' for 1 turn)\n- Identical moves cancel out.\n\n---\nINSTRUCTIONS:\nGenerate 3 distinct 'universes' (trajectories). For each, propose one of your available actions and then predict your opponent's *most likely* counter-move.\nEvaluate the outcome of this 2-move exchange.\n\nUniverse 1:\n- My Action: [ACTION 1]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 2:\n- My Action: [ACTION 2]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\nUniverse 3:\n- My Action: [ACTION 3]\n- Opponent's Likely Response: [OPPONENT_ACTION]\n- Outcome: [Describe the resulting HP and debuff state and why it's good or bad for you]\n\n---\nFINAL RECOMMENDATION:\nBased on your 3 simulations, which *first action* is the best?\nOutput your single best action from the \"Available Actions\" list and nothing else.\n",
+            "p2_thoughts": "Universe 1:\n- My Action: DEFEND\n- Opponent's Likely Response: ATTACK (costs 2 AP, they have exactly 2 AP)\n- Outcome: DEFEND beats ATTACK - opponent gets 'Cannot Attack' for 1 turn, I take no damage. This leaves me at 3 HP vs their 2 HP, and they'll be debuffed next turn. Very favorable position.\n\nUniverse 2:\n- My Action: FEINT\n- Opponent's Likely Response: ATTACK (costs 2 AP, they want to capitalize on having more AP)\n- Outcome: ATTACK beats FEINT - I lose 1 HP, dropping to 2 HP vs their 2 HP. This creates a tied HP situation which is less favorable since I started with the HP advantage.\n\nUniverse 3:\n- My Action: DEFEND\n- Opponent's Likely Response: KICKS (costs 2 AP, alternative to attack)\n- Outcome: KICKS beats DEFEND - I lose 1 HP, dropping to 2 HP vs their 2 HP. Similar to Universe 2, this eliminates my HP advantage and creates an even match.\n\nFINAL RECOMMENDATION:\nDEFEND",
+            "p2_action": "DEFEND",
+            "p2_available_actions": [
+                "DEFEND",
+                "FEINT"
+            ],
+            "game_status": "P1 Wins (P2 Out of AP)",
+            "state_after_turn": {
+                "p1_hp": 2,
+                "p2_hp": 3,
+                "p1_ap": 1,
+                "p2_ap": 0,
+                "p1_debuff": null,
+                "p2_debuff": null,
+                "turn": 4,
+                "first_damage_dealt": true
+            }
+        }
+    ]
+}
